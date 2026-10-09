@@ -4,6 +4,8 @@ EasyBill is a web-based billing and inventory management application designed to
 
 The application uses Firebase Authentication for user login and Cloud Firestore to store user-specific billing and inventory data.
 
+## Live Project: https://bill-7486c.web.app/
+
 ## Features
 
 ### 1. User Authentication
@@ -71,7 +73,6 @@ The application uses Firebase Authentication for user login and Cloud Firestore 
 
 ## Project Structure
 
-```text
 EasyBill/
 ├── index.html
 ├── style.css
@@ -80,34 +81,6 @@ EasyBill/
 ├── manifest.json
 ├── sw.js
 └── README.md
-```
-
-## Getting Started
-
-### Prerequisites
-- A modern web browser.
-- Visual Studio Code or another code editor.
-- A Firebase project with the required services configured.
-
-### Installation
-
-1. Clone the repository:
-
-   ```bash
-   git clone https://github.com/vishalchoudhary03/EasyBill---billing-system.git
-   ```
-
-2. Open the project folder in Visual Studio Code.
-
-3. Configure Firebase web app settings if using your own Firebase project.
-
-4. Enable the required Firebase Authentication sign-in method and configure Cloud Firestore.
-
-5. Apply appropriate Firestore Security Rules to protect user data.
-
-6. Run the application using a compatible local development server, such as the VS Code Live Server extension.
-
-7. Sign in using a valid Firebase Authentication account.
 
 ## Firebase and Data Security
 
