@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>EasyBil</title>
+<meta property="og:title" content="EasyBil - Billing & Inventory Management System">
+<meta property="og:description" content="Apni shop ya business ke liye aasani se bills banayein aur inventory manage karein.">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<meta name="app-version" content="__APP_VERSION__" />
+<link rel="manifest" href="manifest.json">
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+
+<div id="updateBanner">
+  <span> A new version is available!</span>
+  <button id="updateBannerBtn">Update Now</button>
+  <button id="updateBannerDismiss" title="Dismiss">&times;</button>
+</div>
+
+<div id="authSection">
+  <div class="login-card">
+    <h1>EasyBill</h1>
+    <p style="text-align:center; color:var(--text-muted); margin-top:-5px; margin-bottom:20px; font-size:14px;">Sign in to your account</p>
+    <label>Email Address</label>
+    <input type="email" id="email" placeholder="name@example.com" autocomplete="off" />
+    <label>Password</label>
+    <input type="password" id="password" placeholder="********" autocomplete="off" />
+    <div class="button-group">
+      <button id="loginBtn" onclick="login()">Sign In</button>
+    </div>
+    <p style="text-align:center; margin-top:20px;">
+      <a href="javascript:void(0)" onclick="openForgotModal()" style="color:var(--primary); text-decoration:none; font-weight:600; font-size:14px;">Forgot Password?</a>
+    </p>
+  </div>
+</div>
+
+<div id="forgotModal">
+  <div class="modal-content">
+    <h3 style="margin-top:0; color:var(--text-main); font-size:1.25rem;">Reset Password</h3>
+    <p style="color:var(--text-muted); font-size:13px; margin-bottom:15px;">Enter your registered email and we'll send you a recovery link.</p>
+    <label>Email Address</label>
+    <input type="email" id="forgotEmail" placeholder="name@example.com" />
+    <div class="button-group" style="margin-top:20px;">
+      <button onclick="sendForgotEmail()">Send Link</button>
+      <button onclick="closeForgotModal()" style="background:#f1f5f9; color:var(--text-main); box-shadow:none;">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<div id="appSection">
+  <div class="navbar">
+    <span class="navbar-title">EasyBill</span>
+    <div class="navbar-btns">
+      <button id="installBtn" onclick="installApp()"> Install App</button>
+      <button id="themeToggleBtn" class="theme-toggle" onclick="toggleTheme()" type="button">Dark</button>
+      <button onclick="logout()">Logout</button>
+    </div>
+  </div>
+
+  <div class="section flex">
+    <div>
+      <label>Customer Name</label>
+      <input type="text" id="customerName" placeholder="Enter customer name" />
+    </div>
+    <div>
+      <label>WhatsApp Number</label>
+      <div style="display:flex; gap:8px;">
+        <input type="text" id="customerCountryCode" value="91" maxlength="4" inputmode="numeric" style="flex:0 0 70px; text-align:center;" title="Country code (no +)" />
+        <input type="tel" id="customerWhatsapp" maxlength="10" placeholder="10-digit mobile number" inputmode="numeric" style="flex:1;" />
+      </div>
+    </div>
+  </div>
+
+  <div class="section flex">
+    <div>
+      <label>Select Item</label>
+      <select id="itemSelect" class="select2" onchange="populateUnits()"></select>
+    </div>
+    <div>
+      <label>Unit</label>
+      <select id="unitSelect" class="select2" onchange="autoFillAndAdd()"></select>
+    </div>
+    <div>
+      <label>Quantity</label>
+      <input type="number" id="qty" value="1" min="0.1" step="0.1" />
+    </div>
+    <div>
+      <label>Price (Rs.)</label>
+      <input type="number" id="price" min="0.1" step="0.1" placeholder="Rate" />
+    </div>
+  </div>
+
+  <div id="stockSectionContainer" class="page-view">
+    <div class="page-header">
+      <button class="back-btn" onclick="toggleStockSection()"><- Back</button>
+      <h3>Professional Stock Tracking</h3>
+    </div>
+    <div class="page-content">
+      <div class="flex" style="background: #f8fafc; padding: 12px; border-radius: var(--radius); margin-bottom: 14px; border: 1px solid var(--border-color);">
+        <div>
+          <label style="margin-top:0;">Search Item in Stock</label>
+          <input type="text" id="stockSearchInput" placeholder="Type item name..." oninput="renderStockTable()" />
+        </div>
+        <div style="display:flex; align-items:flex-end;">
+           <button onclick="clearStockSearch()" class="filter-btn">x Clear Filter</button>
+        </div>
+      </div>
+      <div id="stockTableList"></div>
+    </div>
+  </div>
+
+  <div id="addNewItemForm" class="page-view">
+    <div class="page-header">
+      <button class="back-btn" onclick="toggleAddItemForm()"><- Back</button>
+      <h3>+ Add New Item to Inventory</h3>
+    </div>
+    <div class="page-content">
+      <label>Item Name</label>
+      <input type="text" id="newItemName" placeholder="e.g. Sugar, Rice" />
+
+      <label>Base Unit</label>
+      <select id="newItemUnit">
+        <option value="" disabled selected>Select Base Unit</option>
+        <option value="kg">kg (Generates g & kg prices)</option>
+        <option value="liter">liter (Generates ml & L prices)</option>
+        <option value="piece">piece</option>
+      </select>
+
+      <label>Price (Rs.) for 1 selected unit</label>
+      <input type="number" id="newItemPrice" min="0.1" step="0.1" placeholder="Price for 1 kg/liter/piece" />
+
+      <button id="saveNewItemBtn" onclick="addNewItem()" style="margin-top:18px; background:var(--success); color:white; padding:12px; border:none; border-radius:var(--radius); font-weight:600; width:100%; box-shadow:var(--shadow);">Save Item</button>
+    </div>
+  </div>
+
+  <div id="editItemsContainer" class="page-view">
+    <div class="page-header">
+      <button class="back-btn" onclick="toggleEditItems()"><- Back</button>
+      <h3>Edit Edit Inventory Items</h3>
+    </div>
+    <div class="page-content">
+      <div class="flex" style="background: #f8fafc; padding: 12px; border-radius: var(--radius); margin-bottom: 12px; border: 1px solid var(--border-color);">
+        <div>
+          <label style="margin-top:0;">Search Item to Edit</label>
+          <input type="text" id="editSearchInput" placeholder="Type item name..." oninput="renderItemsList()" />
+        </div>
+        <div style="display:flex; align-items:flex-end;">
+           <button onclick="clearEditSearch()" class="filter-btn">x Clear Filter</button>
+        </div>
+      </div>
+      <div id="itemsList"></div>
+    </div>
+  </div>
+
+  
+  <div id="recycleBinContainer" class="page-view">
+    <div class="page-header">
+      <button class="back-btn" onclick="toggleRecycleBin()"><- Back</button>
+      <h3> Recycle Bin</h3>
+    </div>
+    <div class="page-content">
+      <div class="flex" style="background: #f8fafc; padding: 12px; border-radius: var(--radius); margin-bottom: 14px; border: 1px solid var(--border-color); align-items:flex-end;">
+        <div>
+          <label style="margin-top:0;">Search Deleted Records</label>
+          <input type="text" id="recycleBinSearchInput" placeholder="Type name..." oninput="renderRecycleBin()" />
+        </div>
+        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+          <button onclick="restoreAllFromRecycleBin()" style="background:var(--success); color:white; border:none; padding:11px 16px; border-radius:var(--radius); cursor:pointer; font-weight:600; font-size:13px; box-shadow:var(--shadow); white-space:nowrap;"> Restore All</button>
+          <button onclick="clearAllRecycleBin()" style="background:var(--danger); color:white; border:none; padding:11px 16px; border-radius:var(--radius); cursor:pointer; font-weight:600; font-size:13px; box-shadow:var(--shadow); white-space:nowrap;"> Clear All</button>
+        </div>
+      </div>
+      <p style="color:var(--text-muted); font-size:0.85rem; margin-top:-6px;">Deleted inventory items and bill records are kept here so you can undo a mistake. Items are automatically and permanently deleted 7 days after being moved here. Permanently deleting cannot be reversed.</p>
+      <div id="recycleBinList"></div>
+    </div>
+  </div>
+
+  <div class="section" id="billArea" style="padding-bottom:0; overflow:hidden;">
+    <h3 style="margin-top:0; border-bottom:1px solid var(--border-color); padding-bottom:8px; font-size:1.15rem; color:var(--text-main);">Current Bill</h3>
+    <div id="billList" style="max-height: 350px; overflow-y: auto; margin-top: 10px;"></div>
+    <div id="grandTotal">Grand Total: Rs. <span id="totalAmount">0.00</span></div>
+  </div>
+
+  <div class="section flex" style="background:#fafafa;">
+    <div>
+      <label>Tax / GST (%)</label>
+      <input type="number" id="tax" min="0" max="100" value="0">
+    </div>
+    <div>
+      <label>Discount (%)</label>
+      <input type="number" id="discount" min="0" max="100" value="0">
+    </div>
+  </div>
+
+  <div class="button-group" style="margin: 0 16px 30px;">
+    <button onclick="resetBill()" style="background:#f59e0b;">Reset Reset</button>
+    <button onclick="saveToHistory()" style="background:#059669;"> Save</button>
+    <button onclick="shareBill()" style="background:#10b981;"> WhatsApp</button>
+    <button onclick="savePDF()" style="background:#ef4444;"> PDF</button>
+
+    <div class="custom-dropdown">
+      <select class="custom-dropdown-select" id="moreActionsDropdown" onchange="handleDropdownAction(this)">
+        <option value="" disabled selected> More Actions</option>
+        <option value="addItem">+ Add Item</option>
+        <option value="stock"> Stock</option>
+        <option value="history"> History</option>
+        <option value="editItems">Edit Edit Items</option>
+        <option value="recycleBin"> Recycle Bin</option>
+        <option value="print"> Print</option>
+      </select>
+    </div>
+  </div>
+
+  <div id="historyContainer" class="page-view">
+    <div class="page-header">
+      <button class="back-btn" onclick="toggleHistory()"><- Back</button>
+      <h3>Bill History & Due Management</h3>
+      <div id="printArea" style="display:none;"></div>
+    </div>
+    <div class="page-content">
+      <div class="flex" style="background: #f8fafc; padding: 12px; border-radius: var(--radius); margin-bottom: 14px; border: 1px solid var(--border-color);">
+        <div>
+          <label style="margin-top:0;">Search by Name</label>
+          <input type="text" id="historySearchName" placeholder="e.g. Rahul" oninput="searchHistory()" />
+        </div>
+        <div>
+          <label style="margin-top:0;">Select Date</label>
+          <input type="date" id="historySearchDate" onchange="searchHistory()" />
+        </div>
+        <div style="display:flex; align-items:flex-end;">
+           <button onclick="clearHistorySearch()" class="filter-btn">x Clear Filter</button>
+        </div>
+      </div>
+      <div id="historyList"></div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+<script type="module" src="app.js"></script>
+</body>
+</html>
